@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 PORT = '/dev/ttyUSB0'
 BAUD = 9600
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'temperaturealert.log')
-APPS_SCRIPT_URL = 'https://script.google.com/macros/s/REPLACE_WITH_YOUR_DEPLOYMENT_ID/exec'
+APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-fTETpM-3AmclY_cJ2O3hC5OJE1q8XowPNXluFz-c184h4gK5OC03TeZcZodqNKfjkA/exec'
 
 # Packet format from device (18 bytes):
 #   bytes 0-8:  zero-byte header (padding)
