@@ -6,7 +6,12 @@ import sys
 import time
 from datetime import datetime, timedelta
 
-PORT = '/dev/ttyUSB0'
+if sys.platform.startswith('win'):
+    PORT = 'COM3'
+elif sys.platform == 'darwin':
+    PORT = '/dev/tty.usbserial-0001'
+else:
+    PORT = '/dev/ttyUSB0'
 BAUD = 9600
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'temperaturealert.log')
 APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-fTETpM-3AmclY_cJ2O3hC5OJE1q8XowPNXluFz-c184h4gK5OC03TeZcZodqNKfjkA/exec'
@@ -42,8 +47,12 @@ def main():
         ser = serial.Serial(PORT, BAUD, timeout=2)
     except serial.SerialException as e:
         print(f"Error: could not open {PORT}: {e}")
-        print("Tip: run with:  sg dialout -c 'python3 main.py'")
-        print("     or add yourself to dialout: sudo usermod -aG dialout $USER")
+        if sys.platform.startswith('win'):
+            print("Tip: check Device Manager to confirm the COM port number,")
+            print("     then update PORT at the top of this script if needed.")
+        else:
+            print("Tip: run with:  sg dialout -c 'python3 main.py'")
+            print("     or add yourself to dialout: sudo usermod -aG dialout $USER")
         sys.exit(1)
 
     print(f"Connected to {PORT} at {BAUD} baud")
