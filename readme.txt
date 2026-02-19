@@ -1,3 +1,6 @@
+Execute with sg dialout -c 'python3 main.py'
+
+
 explore my usb temperaturealert dongle and try fix my python program main.py to connect to it
 [197511.866733] ftdi_sio 3-7.4.1:1.0: FTDI USB Serial Device converter detected
 [197511.866763] usb 3-7.4.1: Detected FT232R
