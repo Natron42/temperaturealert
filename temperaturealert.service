@@ -3,11 +3,11 @@ Description=USB Temperature Alert Logger
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/ron/git/temperaturealert/main.py
-WorkingDirectory=/home/ron/git/temperaturealert
+ExecStart=/usr/bin/python3 /home/%i/git/temperaturealert/main.py
+WorkingDirectory=/home/%i/git/temperaturealert
 Restart=on-failure
 RestartSec=10
-User=ron
+User=%i
 SupplementaryGroups=dialout
 
 [Install]
