@@ -42,6 +42,26 @@ def seconds_to_next_quarter():
     return 15 * 60 - elapsed
 
 
+def log_temperature(ser):
+    try:
+        temp_f = read_temperature_f(ser)
+    except serial.SerialException as e:
+        temp_f = None
+        print(f"Serial error: {e}")
+
+    timestamp = datetime.now().strftime('%Y%m%d:%H:%M')
+    line = f"{timestamp} {temp_f:.1f}°F"
+
+    print(line)
+    with open(LOG_FILE, 'a') as f:
+        f.write(line + '\n')
+
+    try:
+        requests.post(APPS_SCRIPT_URL, data=line, timeout=10)
+    except Exception as e:
+        print(f"Google Doc post failed: {e}")
+
+
 def main():
     try:
         ser = serial.Serial(PORT, BAUD, timeout=2)
@@ -59,30 +79,15 @@ def main():
     print(f"Logging to {LOG_FILE}")
 
     try:
+        # Record temperature immediately on startup
+        log_temperature(ser)
+
         while True:
             wait = seconds_to_next_quarter()
             next_time = datetime.now() + timedelta(seconds=wait)
             print(f"Next log at {next_time.strftime('%Y%m%d:%H:%M')} (in {wait:.0f}s)")
             time.sleep(wait)
-
-            try:
-                temp_f = read_temperature_f(ser)
-            except serial.SerialException as e:
-                temp_f = None
-                print(f"Serial error: {e}")
-
-            timestamp = datetime.now().strftime('%Y%m%d:%H:%M')
-
-            line = f"{timestamp} {temp_f:.1f}°F"
-
-            print(line)
-            with open(LOG_FILE, 'a') as f:
-                f.write(line + '\n')
-
-            try:
-                requests.post(APPS_SCRIPT_URL, data=line, timeout=10)
-            except Exception as e:
-                print(f"Google Doc post failed: {e}")
+            log_temperature(ser)
 
     except KeyboardInterrupt:
         print("\nStopped.")
