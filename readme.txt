@@ -18,3 +18,12 @@ Have it write to the log every 15 minutes and start at the top of the hour.
 Version 2
 write to Google Doc https://docs.google.com/document/d/1pakJ4mGTCINLysE-wrXpV50rKjhVCIImlh9_giLEzCs/edit?usp=sharing
 
+Version 3
+when starting up record temperature
+create a shell cmd to run and on boot
+
+Version 4
+Add the current outside temperature
+
+
+

@@ -15,6 +15,7 @@ else:
 BAUD = 9600
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'temperaturealert.log')
 APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-fTETpM-3AmclY_cJ2O3hC5OJE1q8XowPNXluFz-c184h4gK5OC03TeZcZodqNKfjkA/exec'
+OUTSIDE_LOCATION = 'Crozet+VA'
 
 # Packet format from device (18 bytes):
 #   bytes 0-8:  zero-byte header (padding)
@@ -42,6 +43,15 @@ def seconds_to_next_quarter():
     return 15 * 60 - elapsed
 
 
+def get_outside_temp_f():
+    try:
+        r = requests.get(f'https://wttr.in/{OUTSIDE_LOCATION}?format=j1', timeout=10)
+        return float(r.json()['current_condition'][0]['temp_F'])
+    except Exception as e:
+        print(f"Weather fetch failed: {e}")
+        return None
+
+
 def log_temperature(ser):
     try:
         temp_f = read_temperature_f(ser)
@@ -49,8 +59,12 @@ def log_temperature(ser):
         temp_f = None
         print(f"Serial error: {e}")
 
+    outside_f = get_outside_temp_f()
+
     timestamp = datetime.now().strftime('%Y%m%d:%H:%M')
-    line = f"{timestamp} {temp_f:.1f}°F"
+    indoor = f"{temp_f:.1f}°F" if temp_f is not None else "ERR°F"
+    outdoor = f" outside:{outside_f:.1f}°F" if outside_f is not None else ""
+    line = f"{timestamp} {indoor}{outdoor}"
 
     print(line)
     with open(LOG_FILE, 'a') as f:
