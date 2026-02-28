@@ -23,7 +23,7 @@ when starting up record temperature
 create a shell cmd to run and on boot
 
 Version 4
-Add the current outside temperature
+Add the current outside temperature at the end of the record
 
 
 

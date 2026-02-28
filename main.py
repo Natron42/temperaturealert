@@ -53,17 +53,20 @@ def get_outside_temp_f():
 
 
 def log_temperature(ser):
-    try:
-        temp_f = read_temperature_f(ser)
-    except serial.SerialException as e:
+    if ser is None:
         temp_f = None
-        print(f"Serial error: {e}")
+    else:
+        try:
+            temp_f = read_temperature_f(ser)
+        except serial.SerialException as e:
+            temp_f = None
+            print(f"Serial error: {e}")
 
     outside_f = get_outside_temp_f()
 
     timestamp = datetime.now().strftime('%Y%m%d:%H:%M')
-    indoor = f"{temp_f:.1f}°F" if temp_f is not None else "ERR°F"
-    outdoor = f" outside:{outside_f:.1f}°F" if outside_f is not None else ""
+    indoor = f"{temp_f:.1f}°F" if temp_f is not None else "XX.X°F"
+    outdoor = f" outside:{outside_f:.1f}°F" if outside_f is not None else "XX.X°F"
     line = f"{timestamp} {indoor}{outdoor}"
 
     print(line)
@@ -71,7 +74,7 @@ def log_temperature(ser):
         f.write(line + '\n')
 
     try:
-        requests.post(APPS_SCRIPT_URL, data=line, timeout=10)
+        requests.post(APPS_SCRIPT_URL, data=line.encode('utf-8'), headers={'Content-Type': 'text/plain; charset=utf-8'}, timeout=10)
     except Exception as e:
         print(f"Google Doc post failed: {e}")
 
@@ -79,17 +82,12 @@ def log_temperature(ser):
 def main():
     try:
         ser = serial.Serial(PORT, BAUD, timeout=2)
+        print(f"Connected to {PORT} at {BAUD} baud")
     except serial.SerialException as e:
-        print(f"Error: could not open {PORT}: {e}")
-        if sys.platform.startswith('win'):
-            print("Tip: check Device Manager to confirm the COM port number,")
-            print("     then update PORT at the top of this script if needed.")
-        else:
-            print("Tip: run with:  sg dialout -c 'python3 main.py'")
-            print("     or add yourself to dialout: sudo usermod -aG dialout $USER")
-        sys.exit(1)
+        print(f"Warning: could not open {PORT}: {e}")
+        print("Continuing without indoor sensor (indoor will log as XX.X°F)")
+        ser = None
 
-    print(f"Connected to {PORT} at {BAUD} baud")
     print(f"Logging to {LOG_FILE}")
 
     try:
@@ -106,7 +104,8 @@ def main():
     except KeyboardInterrupt:
         print("\nStopped.")
     finally:
-        ser.close()
+        if ser is not None:
+            ser.close()
 
 
 if __name__ == '__main__':
