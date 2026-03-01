@@ -1,4 +1,4 @@
-#version 4.1 fix formating
+#version 4.2 fix outside temp location (use zip code 22932 instead of name)
 
 import os
 import requests
@@ -17,7 +17,7 @@ else:
 BAUD = 9600
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'temperaturealert.log')
 APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-fTETpM-3AmclY_cJ2O3hC5OJE1q8XowPNXluFz-c184h4gK5OC03TeZcZodqNKfjkA/exec'
-OUTSIDE_LOCATION = 'Crozet+VA'
+OUTSIDE_LOCATION = '22932'
 
 # Packet format from device (18 bytes):
 #   bytes 0-8:  zero-byte header (padding)
@@ -76,7 +76,8 @@ def log_temperature(ser):
         f.write(line + '\n')
 
     try:
-        requests.post(APPS_SCRIPT_URL, data=line.encode('utf-8'), headers={'Content-Type': 'text/plain; charset=utf-8'}, timeout=10)
+        r = requests.post(APPS_SCRIPT_URL, data=line.encode('utf-8'), headers={'Content-Type': 'text/plain; charset=utf-8'}, timeout=10)
+        print(f"Google Doc post: {r.status_code} {r.text[:200]}")
     except Exception as e:
         print(f"Google Doc post failed: {e}")
 
